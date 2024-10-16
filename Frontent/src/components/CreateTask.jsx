@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function CreateTask() {
   const [formData, setFormData] = useState({
@@ -20,12 +20,15 @@ export default function CreateTask() {
   async function handleSubmit(event) {
     event.preventDefault();
     try {
-      const response = await fetch("http://localhost:4000/api/tasks", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        "https://digital-login-backend.onrender.com/api/tasks",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(formData),
+        }
+      );
       const data = await response.json();
       if (data.success) {
         navigate("/tasks");
@@ -122,6 +125,12 @@ export default function CreateTask() {
       >
         Create Task
       </button>
+      <div className='flex gap-2 mt-5'>
+        <p>Want to show your all task?</p>
+        <Link to='/tasks'>
+          <span className='text-blue-700'>Tasks</span>
+        </Link>
+      </div>
     </form>
   );
 }
