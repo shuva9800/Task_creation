@@ -32,15 +32,27 @@ exports.getTasks = async (req, res) => {
 exports.updateTask = async (req, res) => {
   try {
     const task = await Task.findById(req.params.tid);
+
+
     if (!task || task.user.toString() !== req.user.id) {
-      return res.status(404).json({ success: false, message: "Task not found" });
+      return res.status(404).json({ success: false, message: "Task not found or not authorized" });
     }
-    const updatedTask = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.status(200).json({ success: true, message: "Task updated", task: updatedTask });
+
+ 
+    task.title = req.body.title || task.title;
+    task.description = req.body.description || task.description;
+    task.status = req.body.status || task.status;
+    task.dueDate = req.body.dueDate || task.dueDate;
+
+    // Save  updated task
+    const updatedTask = await task.save();
+
+    return res.status(200).json({ success: true, message: "Task updated successfully", task: updatedTask });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: "Error updating task", error: error.message });
   }
 };
+
 
 // Delete a task
 exports.deleteTask = async (req, res) => {
