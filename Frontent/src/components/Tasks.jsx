@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function Tasks() {
   const [tasks, setTasks] = useState([]);
@@ -11,6 +12,7 @@ export default function Tasks() {
     dueDate: "",
   });
   const navigate = useNavigate();
+  const { currentUser } = useSelector((state) => state.user);
 
   useEffect(() => {
     async function fetchTasks() {
@@ -103,118 +105,131 @@ export default function Tasks() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 sm:p-6 md:p-8">
-      <h1 className="text-2xl md:text-3xl font-bold text-center mb-6">
-        Your Tasks
-      </h1>
+    <div>
+      {currentUser ? (
+        <div className="min-h-screen bg-gray-100 p-4 sm:p-6 md:p-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-center mb-6">
+            Your Tasks
+          </h1>
 
-      {/* Form for editing a task */}
-      {editingTask && (
-        <div className="mb-6 bg-white p-4 rounded-lg shadow-lg max-w-lg mx-auto">
-          <h2 className="text-lg font-semibold mb-4">Edit Task</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">
-                Title
-              </label>
-              <input
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded"
-                required
-              />
+          {/* Form for editing a task */}
+          {editingTask && (
+            <div className="mb-6 bg-white p-4 rounded-lg shadow-lg max-w-lg mx-auto">
+              <h2 className="text-lg font-semibold mb-4">Edit Task</h2>
+              <form onSubmit={handleSubmit}>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Description
+                  </label>
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Status
+                  </label>
+                  <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded"
+                    required
+                  >
+                    <option value="Pending">Pending</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Due Date
+                  </label>
+                  <input
+                    type="date"
+                    name="dueDate"
+                    value={formData.dueDate}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded"
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-200 w-full"
+                >
+                  Update Task
+                </button>
+              </form>
             </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">
-                Description
-              </label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded"
-                required
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">
-                Status
-              </label>
-              <select
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded"
-                required
+          )}
+
+          {/* Task List */}
+          <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {tasks.map((task) => (
+              <li
+                key={task._id}
+                className="bg-white p-6 rounded-lg shadow-lg transition hover:shadow-xl flex flex-col justify-between"
               >
-                <option value="Pending">Pending</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Completed">Completed</option>
-              </select>
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">
-                Due Date
-              </label>
-              <input
-                type="date"
-                name="dueDate"
-                value={formData.dueDate}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded"
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-200 w-full"
-            >
-              Update Task
-            </button>
-          </form>
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">{task.title}</h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    {task.description}
+                  </p>
+                  <p className="text-sm text-gray-500">Status: {task.status}</p>
+                  <p className="text-sm text-gray-500">
+                    Due Date: {new Date(task.dueDate).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="flex justify-between mt-4">
+                  <button
+                    onClick={() => handleEdit(task)}
+                    className="bg-yellow-500 text-white py-2 px-4 rounded-lg hover:bg-yellow-600 transition duration-200"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(task._id)}
+                    className="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition duration-200"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div className="flex w-full justify-center items-center gap-2 mt-5">
+            <p>Want to Go create task page?</p>
+            <Link to="/createtask">
+              <span className="text-blue-700">Create Task</span>
+            </Link>
+          </div>
+        </div>
+      ) : (
+        <div className="flex w-full justify-center items-center gap-2 mt-5">
+          <p>Go to Login page</p>
+          <Link to="/login">
+            <span className="text-blue-700">Login</span>
+          </Link>
         </div>
       )}
-
-      {/* Task List */}
-      <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {tasks.map((task) => (
-          <li
-            key={task._id}
-            className="bg-white p-6 rounded-lg shadow-lg transition hover:shadow-xl flex flex-col justify-between"
-          >
-            <div>
-              <h3 className="text-lg font-semibold mb-2">{task.title}</h3>
-              <p className="text-sm text-gray-600 mb-4">{task.description}</p>
-              <p className="text-sm text-gray-500">Status: {task.status}</p>
-              <p className="text-sm text-gray-500">
-                Due Date: {new Date(task.dueDate).toLocaleDateString()}
-              </p>
-            </div>
-            <div className="flex justify-between mt-4">
-              <button
-                onClick={() => handleEdit(task)}
-                className="bg-yellow-500 text-white py-2 px-4 rounded-lg hover:bg-yellow-600 transition duration-200"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => handleDelete(task._id)}
-                className="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition duration-200"
-              >
-                Delete
-              </button>
-            </div>
-            <div className="flex gap-2 mt-5">
-              <p>Go to create task page</p>
-              <Link to="/createtask">
-                <span className="text-blue-700">Create Task</span>
-              </Link>
-            </div>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }

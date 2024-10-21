@@ -125,10 +125,10 @@ export default function CreateTask() {
       >
         Create Task
       </button>
-      <div className='flex gap-2 mt-5'>
+      <div className="flex gap-2 mt-5">
         <p>Want to show your all task?</p>
-        <Link to='/tasks'>
-          <span className='text-blue-700'>Tasks</span>
+        <Link to="/tasks">
+          <span className="text-blue-700">Tasks</span>
         </Link>
       </div>
     </form>

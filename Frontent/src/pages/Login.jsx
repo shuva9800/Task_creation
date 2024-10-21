@@ -1,13 +1,20 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
+import { useDispatch, useSelector } from "react-redux";
+import {
+  signInFalior,
+  signInStart,
+  signInSuccess,
+} from "../redux/user/userSlice";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function Login() {
   const [formData, SetFormData] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+
+  const { loading, error } = useSelector((state) => state.user);
+
+  const dispatch = useDispatch();
 
   const navigate = useNavigate();
 
@@ -20,30 +27,31 @@ export default function Login() {
 
   async function submitHandler(event) {
     event.preventDefault();
-    setLoading(true);
+
     try {
-      const response = await fetch("https://digital-login-backend.onrender.com/api/login", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      dispatch(signInStart());
+      const response = await fetch(
+        "https://digital-login-backend.onrender.com/api/login",
+        {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        }
+      );
 
       const data = await response.json();
       if (data.success === false) {
-        setError(data.message);
-        setLoading(false);
-
+        dispatch(signInFalior(data.message));
         return;
       }
-      setLoading(false);
 
+      dispatch(signInSuccess(data.data));
       toast.success("login success");
       navigate("/createtask");
       console.log(data);
     } catch (error) {
-      setError(error);
-
+      dispatch(signInFalior(error));
       return;
     }
   }
@@ -78,12 +86,7 @@ export default function Login() {
           <span className="text-blue-700">Sign Up</span>
         </Link>
       </div>
-      {/* <div>
-        {error && (<span className="text-red-600 mt-5">
-          {error}
-        </span>)}
-      </div>
-     */}
+      <div>{error && <span className="text-red-600 mt-5">{error}</span>}</div>
     </div>
   );
 }
